@@ -23,11 +23,11 @@ deploy: target/$(NAME)-$(VERSION).zip
 	aws s3 --region $(AWS_REGION) \
 		cp --acl \
 		public-read target/$(NAME)-$(VERSION).zip \
-		s3://$(S3_BUCKET)/lambdas/$(NAME)-$(VERSION).zip 
+		s3://$(S3_BUCKET)/lambdas/$(NAME)-$(VERSION).zip
 	aws s3 --region $(AWS_REGION) \
 		cp --acl public-read \
 		s3://$(S3_BUCKET)/lambdas/$(NAME)-$(VERSION).zip \
-		s3://$(S3_BUCKET)/lambdas/$(NAME)-latest.zip 
+		s3://$(S3_BUCKET)/lambdas/$(NAME)-latest.zip
 
 deploy-all-regions: deploy
 	@for REGION in $(ALL_REGIONS); do \
@@ -55,14 +55,14 @@ target/$(NAME)-$(VERSION).zip: src/*/*.py requirements.txt Dockerfile.lambda
 		chmod ugo+r target/$(NAME)-$(VERSION).zip
 
 venv: requirements.txt
-	virtualenv -p python3.9 venv  && \
+	virtualenv -p python3.13 venv  && \
 	. ./venv/bin/activate && \
 	pip install --quiet --upgrade pip && \
 	pip install --quiet -r requirements.txt
 
 clean:
 	rm -rf venv target
-	find . -name \*.pyc | xargs rm 
+	find . -name \*.pyc | xargs rm
 
 test: venv
 	for i in $$PWD/cloudformation/*; do \
@@ -93,7 +93,7 @@ delete-lambda:
 	aws cloudformation delete-stack --stack-name $(NAME)
 	aws cloudformation wait stack-delete-complete  --stack-name $(NAME)
 
-demo: 
+demo:
 	export VPC_ID=$$(aws ec2  --output text --query 'Vpcs[?IsDefault].VpcId' describe-vpcs) ; \
         export SUBNET_IDS=$$(aws ec2 describe-subnets --output text --filters Name=vpc-id,Values=$$VPC_ID Name=default-for-az,Values=true --query 'Subnets[?MapPublicIpOnLaunch].SubnetId' | tr '\t', ','); \
 	echo "$$CFN_COMMAND demo in default VPC $$VPC_ID, subnets $$SUBNET_IDS" ; \

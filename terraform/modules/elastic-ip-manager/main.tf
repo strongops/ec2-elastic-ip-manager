@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 0.12.6"
+  required_version = ">= 1.0"
 }
 
 data "aws_region" "current" {}
@@ -75,7 +75,7 @@ resource "aws_lambda_function" "elastic_ip_manager" {
   s3_key    = var.s3_key
 
   handler = "elastic_ip_manager.handler"
-  runtime = "python3.7"
+  runtime = "python3.13"
   timeout = 600
 
   tags = var.tags
