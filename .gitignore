@@ -113,3 +113,5 @@ ENV/
 *.tfstate
 *.tfstate.*
 terraform/modules/elastic-ip-manager/.build/
+
+.DS_Store
