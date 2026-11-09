@@ -17,8 +17,8 @@ variable "s3_bucket" {
 
 variable "s3_key" {
   type        = string
-  description = "The S3 key of an object containing the elastic-ip-manager function's deployment package"
-  default     = "lambdas/elastic-ip-manager-0.1.6.zip"
+  description = "The S3 key of a prebuilt deployment package. If omitted, the package is built from ./src by Terraform."
+  default     = null
 }
 
 variable "tags" {
