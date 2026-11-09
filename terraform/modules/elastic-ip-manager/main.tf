@@ -1,12 +1,32 @@
 terraform {
   required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = ">= 2.2"
+    }
+  }
 }
 
 data "aws_region" "current" {}
 
-# Determine the default S3 bucket name for the corresponding region
+# Package source: build from ./src unless an S3 package is explicitly given.
+# The function only depends on boto3, which the Lambda runtime provides.
 locals {
-  s3_bucket = coalesce(var.s3_bucket, "binxio-public-${data.aws_region.current.name}")
+  use_s3    = var.s3_key != null
+  s3_bucket = local.use_s3 ? coalesce(var.s3_bucket, "binxio-public-${data.aws_region.current.name}") : null
+}
+
+data "archive_file" "elastic_ip_manager" {
+  count       = local.use_s3 ? 0 : 1
+  type        = "zip"
+  source_dir  = "${path.module}/../../../src"
+  output_path = "${path.module}/.build/elastic-ip-manager.zip"
+  excludes    = ["**/__pycache__/**", "**/*.pyc"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -73,6 +93,9 @@ resource "aws_lambda_function" "elastic_ip_manager" {
 
   s3_bucket = local.s3_bucket
   s3_key    = var.s3_key
+
+  filename         = local.use_s3 ? null : data.archive_file.elastic_ip_manager[0].output_path
+  source_code_hash = local.use_s3 ? null : data.archive_file.elastic_ip_manager[0].output_base64sha256
 
   handler = "elastic_ip_manager.handler"
   runtime = "python3.13"
