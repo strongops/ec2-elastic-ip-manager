@@ -29,7 +29,7 @@ aws cloudformation create-stack \
         --stack-name elastic-ip-manager \
         --template-body file://./cloudformation/elastic-ip-manager.yaml \
         --parameters ParameterKey=LambdaS3Bucket,ParameterValue=${LAMBDA_BUCKET_PREFIX}-${LAMBDA_BUCKET_REGION} \
-        --parameters ParameterKey=CFNCustomProviderZipFileName,ParameterValue=lambdas/elastic-ip-manager-latest.zip
+        --parameters ParameterKey=CFNCustomProviderZipFileName,ParameterValue=lambdas/elastic-ip-manager-0.2.1.zip
 ```
 ## Create a pool of Elastic IP addresses
 Create a pool of elastic ip addresses, and tag them with an `elastic-ip-manager-pool` value:
